@@ -1,0 +1,2291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RiseCraft - Life Goal Tracker</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #0F3460;
+            --accent: #E9A621;
+            --secondary: #2A9D8F;
+            --light: #F8F9FA;
+            --dark: #1a1a1a;
+            --border: #e0e0e0;
+            --success: #27ae60;
+            --gradient-warm: linear-gradient(135deg, #E9A621 0%, #f39c12 100%);
+            --gradient-cool: linear-gradient(135deg, #2A9D8F 0%, #16a085 100%);
+            --gradient-primary: linear-gradient(135deg, #0F3460 0%, #1a4d7a 100%);
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            color: var(--dark);
+            overflow: hidden;
+        }
+
+        .container {
+            max-width: 480px;
+            height: 100vh;
+            margin: 0 auto;
+            background: white;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .screen {
+            display: none;
+            flex: 1;
+            overflow-y: auto;
+            animation: fadeIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .screen.active {
+            display: flex;
+            flex-direction: column;
+        }
+
+        @keyframes fadeIn {
+            from { 
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to { 
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .header {
+            background: var(--gradient-primary);
+            color: white;
+            padding: 16px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 8px 24px rgba(15, 52, 96, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -10%;
+            width: 200px;
+            height: 200px;
+            background: rgba(233, 166, 33, 0.1);
+            border-radius: 50%;
+        }
+
+        .header-title {
+            font-size: 22px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            position: relative;
+            z-index: 1;
+            letter-spacing: -0.5px;
+        }
+
+        .logo {
+            font-size: 28px;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        .header-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+            padding: 8px 12px;
+            border-radius: 8px;
+            transition: all 0.3s;
+            position: relative;
+            z-index: 1;
+        }
+
+        .header-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.1);
+        }
+
+        .content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+        .content::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .content::-webkit-scrollbar-thumb {
+            background: var(--accent);
+            border-radius: 3px;
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+            animation: slideInUp 0.5s ease-out;
+            animation-fill-mode: both;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--primary);
+            font-size: 14px;
+            letter-spacing: 0.3px;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 14px 16px;
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            font-size: 14px;
+            transition: all 0.3s;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 20px rgba(233, 166, 33, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .btn {
+            padding: 14px 24px;
+            border: none;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            width: 100%;
+            margin-top: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-primary {
+            background: var(--gradient-warm);
+            color: white;
+            box-shadow: 0 8px 24px rgba(233, 166, 33, 0.3);
+        }
+
+        .btn-primary:hover {
+            box-shadow: 0 12px 32px rgba(233, 166, 33, 0.5);
+            transform: translateY(-4px);
+        }
+
+        .btn-secondary {
+            background: var(--gradient-cool);
+            color: white;
+            box-shadow: 0 8px 24px rgba(42, 157, 143, 0.3);
+        }
+
+        .btn-secondary:hover {
+            box-shadow: 0 12px 32px rgba(42, 157, 143, 0.5);
+            transform: translateY(-4px);
+        }
+
+        .btn-text {
+            background: none;
+            color: var(--accent);
+            padding: 8px;
+            font-size: 13px;
+            text-transform: none;
+            letter-spacing: 0;
+        }
+
+        .btn-text:hover {
+            text-decoration: underline;
+        }
+
+        .card {
+            background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+            border: 2px solid var(--border);
+            border-radius: 16px;
+            padding: 18px;
+            margin-bottom: 14px;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+
+        .card:hover {
+            border-color: var(--accent);
+            box-shadow: 0 12px 32px rgba(233, 166, 33, 0.15);
+            transform: translateY(-4px);
+        }
+
+        .card-title {
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 15px;
+        }
+
+        .card-text {
+            font-size: 13px;
+            color: #666;
+            line-height: 1.6;
+        }
+
+        .task-card {
+            background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+            border: 2px solid var(--border);
+            border-radius: 16px;
+            padding: 18px;
+            margin-bottom: 14px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .task-card::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 4px;
+            background: var(--gradient-warm);
+        }
+
+        .task-card:hover {
+            border-color: var(--accent);
+            box-shadow: 0 12px 32px rgba(233, 166, 33, 0.15);
+            transform: translateY(-4px);
+        }
+
+        .task-card.completed {
+            opacity: 0.7;
+            background: linear-gradient(135deg, #ecf0f1 0%, #e8eef2 100%);
+        }
+
+        .task-content {
+            flex: 1;
+            padding-left: 8px;
+        }
+
+        .task-category {
+            font-size: 11px;
+            color: var(--secondary);
+            font-weight: 700;
+            text-transform: uppercase;
+            margin-bottom: 6px;
+            letter-spacing: 0.5px;
+        }
+
+        .task-text {
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--dark);
+            margin-bottom: 8px;
+            line-height: 1.4;
+        }
+
+        .task-time {
+            font-size: 12px;
+            color: #999;
+        }
+
+        .task-checkbox {
+            width: 28px;
+            height: 28px;
+            border: 2.5px solid var(--accent);
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-left: 12px;
+            flex-shrink: 0;
+            transition: all 0.3s;
+            font-weight: 700;
+            color: var(--accent);
+            font-size: 16px;
+        }
+
+        .task-checkbox:hover {
+            background: var(--accent);
+            color: white;
+            box-shadow: 0 0 20px rgba(233, 166, 33, 0.3);
+        }
+
+        .nav-tabs {
+            display: flex;
+            background: var(--gradient-primary);
+            color: white;
+            border-top: 1px solid var(--border);
+            gap: 0;
+        }
+
+        .nav-tab {
+            flex: 1;
+            padding: 14px 12px;
+            text-align: center;
+            cursor: pointer;
+            border: none;
+            background: none;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 12px;
+            font-weight: 600;
+            transition: all 0.3s;
+            border-bottom: 3px solid transparent;
+            letter-spacing: 0.3px;
+        }
+
+        .nav-tab.active {
+            background: rgba(233, 166, 33, 0.15);
+            color: white;
+            border-bottom-color: var(--accent);
+        }
+
+        .nav-tab:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+
+        .stat-box {
+            background: var(--gradient-warm);
+            color: white;
+            padding: 24px;
+            border-radius: 16px;
+            margin-bottom: 16px;
+            text-align: center;
+            box-shadow: 0 8px 24px rgba(233, 166, 33, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-box::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -10%;
+            width: 200px;
+            height: 200px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+        }
+
+        .stat-box.cool {
+            background: var(--gradient-cool);
+            box-shadow: 0 8px 24px rgba(42, 157, 143, 0.3);
+        }
+
+        .stat-number {
+            font-size: 36px;
+            font-weight: 800;
+            margin-bottom: 6px;
+            position: relative;
+            z-index: 1;
+            letter-spacing: -1px;
+        }
+
+        .stat-label {
+            font-size: 13px;
+            opacity: 0.95;
+            position: relative;
+            z-index: 1;
+            font-weight: 500;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+            margin-bottom: 16px;
+        }
+
+        .grid-item {
+            background: linear-gradient(135deg, #f5f7fa 0%, #e8f0f5 100%);
+            padding: 20px;
+            border-radius: 16px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            border: 2px solid var(--border);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+
+        .grid-item:hover {
+            border-color: var(--accent);
+            transform: translateY(-4px);
+            box-shadow: 0 12px 32px rgba(233, 166, 33, 0.15);
+        }
+
+        .grid-item-icon {
+            font-size: 36px;
+            margin-bottom: 10px;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        .grid-item-text {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--primary);
+            letter-spacing: 0.3px;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: flex-end;
+            animation: slideUp 0.3s ease-out;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(100%); }
+            to { transform: translateY(0); }
+        }
+
+        .modal-content {
+            background: white;
+            width: 100%;
+            border-radius: 24px 24px 0 0;
+            padding: 28px 20px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            letter-spacing: -0.5px;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 28px;
+            cursor: pointer;
+            color: var(--primary);
+            transition: all 0.3s;
+        }
+
+        .close-btn:hover {
+            transform: rotate(90deg);
+        }
+
+        .auth-container {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            text-align: center;
+        }
+
+        .auth-logo {
+            font-size: 72px;
+            margin-bottom: 20px;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        .auth-title {
+            font-size: 32px;
+            font-weight: 800;
+            color: var(--primary);
+            margin-bottom: 10px;
+            letter-spacing: -1px;
+        }
+
+        .auth-subtitle {
+            font-size: 15px;
+            color: #666;
+            margin-bottom: 36px;
+            line-height: 1.6;
+        }
+
+        .category-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 14px;
+        }
+
+        .category-option {
+            background: linear-gradient(135deg, #f5f7fa 0%, #e8f0f5 100%);
+            padding: 24px;
+            border-radius: 16px;
+            cursor: pointer;
+            border: 2.5px solid var(--border);
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+
+        .category-option:hover {
+            border-color: var(--accent);
+            transform: translateY(-4px);
+            box-shadow: 0 12px 32px rgba(233, 166, 33, 0.15);
+        }
+
+        .category-option.selected {
+            border-color: var(--accent);
+            background: var(--gradient-warm);
+            color: white;
+            box-shadow: 0 12px 32px rgba(233, 166, 33, 0.4);
+        }
+
+        .category-icon {
+            font-size: 40px;
+            margin-bottom: 12px;
+        }
+
+        .category-name {
+            font-weight: 700;
+            font-size: 17px;
+            letter-spacing: -0.3px;
+        }
+
+        .dashboard-header {
+            background: var(--gradient-primary);
+            color: white;
+            padding: 24px 20px;
+            border-radius: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 8px 24px rgba(15, 52, 96, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .dashboard-header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -10%;
+            width: 200px;
+            height: 200px;
+            background: rgba(233, 166, 33, 0.1);
+            border-radius: 50%;
+        }
+
+        .dashboard-date {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: relative;
+            z-index: 1;
+        }
+
+        .date-greeting {
+            font-size: 14px;
+            opacity: 0.9;
+            margin-bottom: 4px;
+            font-weight: 500;
+        }
+
+        .date-day {
+            font-size: 32px;
+            font-weight: 800;
+            letter-spacing: -1px;
+        }
+
+        .date-text {
+            font-size: 12px;
+            opacity: 0.8;
+            margin-top: 2px;
+        }
+
+        .streak-icon {
+            font-size: 40px;
+            margin-bottom: 6px;
+        }
+
+        .streak-number {
+            font-size: 24px;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+        }
+
+        .streak-label {
+            font-size: 11px;
+            opacity: 0.9;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 600;
+        }
+
+        .task-stats {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .task-stat {
+            flex: 1;
+            background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+            padding: 14px;
+            border-radius: 12px;
+            border: 2px solid var(--border);
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+
+        .task-stat-number {
+            font-size: 20px;
+            font-weight: 800;
+            color: var(--accent);
+        }
+
+        .task-stat-label {
+            font-size: 11px;
+            color: #666;
+            margin-top: 4px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 10px;
+            background: var(--border);
+            border-radius: 5px;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--gradient-warm);
+            transition: width 0.5s ease-out;
+            border-radius: 5px;
+            box-shadow: 0 0 15px rgba(233, 166, 33, 0.4);
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .badge-success {
+            background: rgba(39, 174, 96, 0.15);
+            color: var(--success);
+        }
+
+        .badge-warning {
+            background: rgba(233, 166, 33, 0.15);
+            color: var(--accent);
+        }
+
+        .badge-primary {
+            background: rgba(15, 52, 96, 0.15);
+            color: var(--primary);
+        }
+
+        /* Goal Cards */
+        .goal-card {
+            padding: 20px 14px;
+            border-radius: 14px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            min-height: 160px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .goal-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at top right, rgba(255,255,255,0.5), transparent);
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+        }
+
+        .goal-card:hover {
+            transform: translateY(-8px) scale(1.05);
+            box-shadow: 0 16px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .goal-card:hover::before {
+            opacity: 1;
+        }
+
+        .goal-icon {
+            font-size: 36px;
+            margin-bottom: 8px;
+            animation: bounce 2s ease-in-out infinite;
+            position: relative;
+            z-index: 1;
+        }
+
+        .goal-card:hover .goal-icon {
+            animation: pulse 0.6s ease-in-out;
+            font-size: 42px;
+        }
+
+        .goal-name {
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 4px;
+            position: relative;
+            z-index: 1;
+            letter-spacing: -0.3px;
+        }
+
+        .goal-desc {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 12px;
+            position: relative;
+            z-index: 1;
+            line-height: 1.4;
+        }
+
+        .goal-discover {
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--accent);
+            padding: 6px 10px;
+            border-radius: 6px;
+            background: rgba(233, 166, 33, 0.1);
+            transition: all 0.3s;
+            position: relative;
+            z-index: 1;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .goal-card:hover .goal-discover {
+            background: var(--accent);
+            color: white;
+            box-shadow: 0 4px 16px rgba(233, 166, 33, 0.4);
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-4px); }
+        }
+    </style>
+    <script>
+        // Define all functions FIRST in the head
+        function goToScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(screen => {
+                screen.classList.remove('active');
+            });
+            const elem = document.getElementById(screenId);
+            if (elem) elem.classList.add('active');
+        }
+
+        function switchNav(element, screenId) {
+            document.querySelectorAll('.nav-tab').forEach(tab => tab.classList.remove('active'));
+            element.classList.add('active');
+            goToScreen(screenId);
+        }
+
+        function selectCategory(element, category) {
+            document.querySelectorAll('.category-option').forEach(opt => opt.classList.remove('selected'));
+            element.classList.add('selected');
+        }
+
+        function openModal(modalId) {
+            const modal = document.getElementById(modalId);
+            if (modal) modal.classList.add('active');
+        }
+
+        function closeModal(modalId) {
+            const modal = document.getElementById(modalId);
+            if (modal) modal.classList.remove('active');
+        }
+
+        // Onboarding Goals Data
+        const onboardingGoals = [
+            { icon: '🙏', name: 'Spiritual Goal', desc: 'Inner peace & mindfulness' },
+            { icon: '👤', name: 'Personal Goal', desc: 'Improve communication & relationships' },
+            { icon: '❤️', name: 'Family Goal', desc: 'Strengthen family bonds' },
+            { icon: '💪', name: 'Health Goal', desc: 'Physical wellness & fitness' },
+            { icon: '💼', name: 'Professional Goal', desc: 'Career growth & advancement' },
+            { icon: '🎓', name: 'Educational Goal', desc: 'Knowledge expansion & learning' },
+            { icon: '💰', name: 'Financial Goal', desc: 'Smart decisions & abundance' },
+            { icon: '🔬', name: 'R&D Goal', desc: 'Innovation & experimentation' },
+            { icon: '⚙️', name: 'Implementation Goal', desc: 'Execute & build projects' },
+            { icon: '🎯', name: 'Life Goal', desc: 'Big picture vision & legacy' }
+        ];
+
+        let currentOnboardingGoal = 0;
+
+        window.nextOnboardingGoal = function() {
+            if (currentOnboardingGoal < onboardingGoals.length - 1) {
+                currentOnboardingGoal++;
+                updateOnboardingGoal();
+            }
+        }
+
+        window.previousOnboardingGoal = function() {
+            if (currentOnboardingGoal > 0) {
+                currentOnboardingGoal--;
+                updateOnboardingGoal();
+            }
+        }
+
+        function updateOnboardingGoal() {
+            const goal = onboardingGoals[currentOnboardingGoal];
+            const iconElem = document.getElementById('onboardingGoalIcon');
+            const nameElem = document.getElementById('onboardingGoalName');
+            const descElem = document.getElementById('onboardingGoalDesc');
+            const counterElem = document.getElementById('onboardingGoalCounter');
+            if (iconElem) iconElem.textContent = goal.icon;
+            if (nameElem) nameElem.textContent = goal.name;
+            if (descElem) descElem.textContent = goal.desc;
+            if (counterElem) counterElem.textContent = `${currentOnboardingGoal + 1} / 10`;
+        }
+
+        // Goal Modal Data
+        const goalDetails = [
+            {
+                icon: '🙏',
+                name: 'Spiritual Goal',
+                desc: 'Inner peace & mindfulness',
+                tasks: ['Daily meditation', 'Gratitude journaling', 'Mindful breathing']
+            },
+            {
+                icon: '👤',
+                name: 'Personal Goal',
+                desc: 'Better relationships',
+                tasks: ['Active listening', 'Express appreciation', 'Quality conversations']
+            },
+            {
+                icon: '❤️',
+                name: 'Family Goal',
+                desc: 'Strengthen family bonds',
+                tasks: ['Family dinner', 'Share stories', 'Express love']
+            },
+            {
+                icon: '💪',
+                name: 'Health Goal',
+                desc: 'Physical wellness',
+                tasks: ['30 mins exercise', 'Healthy meals', 'Sleep 8 hours']
+            },
+            {
+                icon: '💼',
+                name: 'Professional Goal',
+                desc: 'Career growth',
+                tasks: ['Work on projects', 'Learn new skills', 'Network']
+            },
+            {
+                icon: '🎓',
+                name: 'Educational Goal',
+                desc: 'Knowledge expansion',
+                tasks: ['Read', 'Take courses', 'Learn languages']
+            },
+            {
+                icon: '💰',
+                name: 'Financial Goal',
+                desc: 'Smart money decisions',
+                tasks: ['Track expenses', 'Save money', 'Invest wisely']
+            },
+            {
+                icon: '🔬',
+                name: 'R&D Goal',
+                desc: 'Innovation & exploration',
+                tasks: ['Research ideas', 'Experiment', 'Create prototypes']
+            },
+            {
+                icon: '⚙️',
+                name: 'Implementation Goal',
+                desc: 'Execute & build',
+                tasks: ['Plan execution', 'Take action', 'Complete projects']
+            },
+            {
+                icon: '🎯',
+                name: 'Life Goal',
+                desc: 'Big picture vision',
+                tasks: ['Define vision', 'Set milestones', 'Review progress']
+            }
+        ];
+
+        window.showGoalModal = function(index) {
+            const goal = goalDetails[index];
+            let modalHTML = `
+                <div class="modal-header">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <span style="font-size: 32px;">${goal.icon}</span>
+                        <div>
+                            <div style="font-size: 18px; font-weight: 700; color: var(--primary);">${goal.name}</div>
+                            <div style="font-size: 12px; color: #666;">${goal.desc}</div>
+                        </div>
+                    </div>
+                    <button class="close-btn" onclick="closeModal('goalDetailModal')">×</button>
+                </div>
+
+                <div style="margin-top: 20px; margin-bottom: 20px;">
+                    <div style="font-size: 13px; font-weight: 700; color: var(--primary); margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.5px;">Sample Daily Tasks</div>
+                    ${goal.tasks.map((task, i) => `
+                        <div class="card" style="margin-bottom: 10px;">
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <div style="width: 28px; height: 28px; border-radius: 50%; background: var(--gradient-warm); display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 14px;">${i + 1}</div>
+                                <div style="font-size: 14px; color: var(--dark);">${task}</div>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+
+                <div style="background: linear-gradient(135deg, rgba(233, 166, 33, 0.1), rgba(42, 157, 143, 0.1)); border-left: 4px solid var(--accent); padding: 14px; border-radius: 8px; margin-bottom: 20px;">
+                    <div style="font-size: 12px; font-weight: 600; color: var(--primary); margin-bottom: 6px;">💡 Why This Matters</div>
+                    <div style="font-size: 12px; color: #666; line-height: 1.6;">Building this goal helps you develop as a person, create meaningful connections, and achieve lasting success across all areas of your life.</div>
+                </div>
+
+                <button class="btn btn-primary" onclick="closeModal('goalDetailModal')">Got It!</button>
+            `;
+            
+            const modal = document.getElementById('goalDetailModal');
+            const content = modal.querySelector('.modal-content');
+            content.innerHTML = modalHTML;
+            openModal('goalDetailModal');
+        }
+    
+
+        // Daily Tasks Goals Data
+        const goals = [
+                { id: 1, name: 'Spiritual Goal', icon: '🙏', description: 'Daily reflection practice' },
+                { id: 2, name: 'Personal Goal', icon: '👤', description: 'Active listening session' },
+                { id: 3, name: 'Family Goal', icon: '❤️', description: 'Express family gratitude' },
+                { id: 4, name: 'Health Goal', icon: '💪', description: '30 mins exercise' },
+                { id: 5, name: 'Professional Goal', icon: '💼', description: 'Work on key project' },
+                { id: 6, name: 'Educational Goal', icon: '🎓', description: 'Learn something new' },
+                { id: 7, name: 'Financial Goal', icon: '💰', description: 'Track daily expenses' },
+                { id: 8, name: 'R&D Goal', icon: '🔬', description: 'Research & explore' },
+                { id: 9, name: 'Implementation Goal', icon: '⚙️', description: 'Execute a plan' },
+                { id: 10, name: 'Life Goal', icon: '🎯', description: 'Progress toward big goal' }
+        ];
+
+        function renderTasks() {
+            const tasksList = document.getElementById('tasksList');
+            if (!tasksList) return;
+            tasksList.innerHTML = goals.map((goal, index) => `
+                <div class="task-card" onclick="completeTask(this)" style="animation-delay: ${index * 0.05}s; animation: slideInUp 0.5s ease-out backwards;">
+                    <div class="task-content">
+                        <div class="task-category">${goal.name}</div>
+                        <div class="task-text">${goal.description}</div>
+                        <div class="task-time">Today • 9:00 AM</div>
+                    </div>
+                    <div class="task-checkbox"></div>
+                </div>
+            `).join('');
+        }
+
+        function completeTask(element) {
+            element.classList.add('completed');
+            element.querySelector('.task-checkbox').textContent = '✓';
+            element.querySelector('.task-checkbox').style.background = 'var(--success)';
+            element.querySelector('.task-checkbox').style.borderColor = 'var(--success)';
+            element.querySelector('.task-checkbox').style.color = 'white';
+        }
+
+        window.completeMissedTask = function(element) {
+            element.classList.add('completed');
+            element.querySelector('.task-checkbox').textContent = '✓';
+            element.querySelector('.task-checkbox').style.background = 'var(--success)';
+            element.querySelector('.task-checkbox').style.borderColor = 'var(--success)';
+            element.querySelector('.task-checkbox').style.color = 'white';
+        }
+
+        window.completeCatchUpTask = function(element, category) {
+            // Mark task as completed
+            element.classList.add('completed');
+            element.querySelector('.task-checkbox').textContent = '✓';
+            element.querySelector('.task-checkbox').style.background = 'var(--success)';
+            element.querySelector('.task-checkbox').style.borderColor = 'var(--success)';
+            element.querySelector('.task-checkbox').style.color = 'white';
+            
+            // Disable further clicks
+            element.style.pointerEvents = 'none';
+            element.style.opacity = '0.7';
+            
+            // Update status message
+            const statusMap = {
+                'spiritual': 'spiritualStatus',
+                'health': 'healthStatus',
+                'professional': 'professionalStatus'
+            };
+            
+            const statusElement = document.getElementById(statusMap[category]);
+            if (statusElement) {
+                statusElement.innerHTML = '🔒 Slot Used Today<br><span style="font-size: 10px; color: #999;">Come back tomorrow for more!</span>';
+            }
+            
+            // Show celebration message
+            setTimeout(() => {
+                alert('🎉 Great job! You completed a missed task!\n\nCome back tomorrow to catch up more!');
+            }, 300);
+        }
+
+        // Initialize when DOM is ready
+        document.addEventListener('DOMContentLoaded', () => {
+            renderTasks();
+            const now = new Date();
+            const dateElem = document.getElementById('currentDate');
+            const dateFullElem = document.getElementById('currentDateFull');
+            if (dateElem) dateElem.textContent = now.toLocaleDateString('en-US', { weekday: 'long' });
+            if (dateFullElem) dateFullElem.textContent = now.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+
+            // Close modal on outside click
+            document.querySelectorAll('.modal').forEach(modal => {
+                modal.addEventListener('click', (e) => {
+                    if (e.target === modal) {
+                        modal.classList.remove('active');
+                    }
+                });
+            });
+        });
+    </script>
+</head>
+<body>
+    <div class="container">
+        <!-- Login Screen -->
+        <div class="screen active" id="loginScreen">
+            <div class="header">
+                <div class="header-title">
+                    <span class="logo">🚀</span>
+                    RiseCraft
+                </div>
+            </div>
+            <div class="content auth-container">
+                <div class="auth-logo">📱</div>
+                <div class="auth-title">RiseCraft</div>
+                <div class="auth-subtitle">One task a day to transform every part of your life</div>
+                
+                <div class="form-group">
+                    <label>Email Address</label>
+                    <input type="email" placeholder="Enter your email">
+                </div>
+                
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" placeholder="Enter your password">
+                </div>
+
+                <button class="btn btn-primary" onclick="goToScreen('categoryScreen')">Sign In</button>
+                <button class="btn btn-text" onclick="goToScreen('signupScreen')">Don't have an account? Sign Up</button>
+                
+                <div style="margin-top: 32px; padding-top: 24px; border-top: 2px solid var(--border);">
+                    <p style="font-size: 12px; color: #999; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;">Admin Access</p>
+                    <button class="btn btn-secondary" onclick="goToScreen('adminLoginScreen')">⚙️ Admin Login</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Admin Login Screen -->
+        <div class="screen" id="adminLoginScreen">
+            <div class="header">
+                <button class="header-btn" onclick="goToScreen('loginScreen')">←</button>
+                <div class="header-title">
+                    <span class="logo">⚙️</span>
+                    Admin Login
+                </div>
+                <div style="width: 32px;"></div>
+            </div>
+            <div class="content auth-container">
+                <div style="font-size: 64px; margin-bottom: 20px;">🔐</div>
+                <div class="auth-title">Admin Portal</div>
+                <div class="auth-subtitle">Manage users, tasks, and analytics</div>
+                
+                <div class="form-group">
+                    <label>Admin Email</label>
+                    <input type="email" placeholder="admin@risecraft.com">
+                </div>
+                
+                <div class="form-group">
+                    <label>Admin Password</label>
+                    <input type="password" placeholder="Enter admin password">
+                </div>
+
+                <button class="btn btn-primary" onclick="goToScreen('adminDashboardScreen')">Enter Admin Dashboard</button>
+            </div>
+        </div>
+
+        <!-- Signup Screen -->
+        <div class="screen" id="signupScreen">
+            <div class="header">
+                <button class="header-btn" onclick="goToScreen('loginScreen')">←</button>
+                <div class="header-title">Create Account</div>
+                <div style="width: 32px;"></div>
+            </div>
+            <div class="content">
+                <div class="form-group">
+                    <label>Full Name</label>
+                    <input type="text" placeholder="Enter your full name">
+                </div>
+                
+                <div class="form-group">
+                    <label>Email Address</label>
+                    <input type="email" placeholder="Enter your email">
+                </div>
+                
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" placeholder="Create a strong password">
+                </div>
+
+                <div class="form-group">
+                    <label>Confirm Password</label>
+                    <input type="password" placeholder="Confirm your password">
+                </div>
+
+                <button class="btn btn-primary" onclick="goToScreen('categoryScreen')">Create Account</button>
+            </div>
+        </div>
+
+        <!-- Category Selection Screen -->
+        <div class="screen" id="categoryScreen">
+            <div class="header">
+                <div class="header-title">
+                    <span class="logo">🚀</span>
+                    Select Your Category
+                </div>
+            </div>
+            <div class="content">
+                <p style="margin-bottom: 20px; color: #666; font-weight: 500;">Choose which category best describes you</p>
+                
+                <div class="category-grid">
+                    <div class="category-option" onclick="selectCategory(this, 'Student')">
+                        <div class="category-icon">👨‍🎓</div>
+                        <div class="category-name">Student</div>
+                    </div>
+                    <div class="category-option" onclick="selectCategory(this, 'Parent')">
+                        <div class="category-icon">👨‍👩‍👧</div>
+                        <div class="category-name">Parent</div>
+                    </div>
+                    <div class="category-option" onclick="selectCategory(this, 'Adult')">
+                        <div class="category-icon">💼</div>
+                        <div class="category-name">Adult</div>
+                    </div>
+                    <div class="category-option" onclick="selectCategory(this, 'Esteemed')">
+                        <div class="category-icon">👴</div>
+                        <div class="category-name">Esteemed</div>
+                    </div>
+                </div>
+
+                <button class="btn btn-primary" style="margin-top: 32px;" onclick="goToScreen('onboardingScreen1')">Continue</button>
+            </div>
+        </div>
+
+        <!-- Onboarding Screen 1: Meet Your 10 Goals -->
+        <div class="screen" id="onboardingScreen1">
+            <div class="header">
+                <div class="header-title">
+                    <span class="logo">🎯</span>
+                    Your 10 Goals
+                </div>
+                <button class="header-btn" onclick="goToScreen('dashboardScreen')">✕</button>
+            </div>
+            <div class="content" style="padding: 0;">
+                <div style="padding: 20px; text-align: center;">
+                    <div style="font-size: 28px; font-weight: 800; color: var(--primary); margin-bottom: 8px; letter-spacing: -1px;">Your 10 Life-Changing Goals</div>
+                    <div style="font-size: 13px; color: #666; margin-bottom: 20px;">Tap any goal to explore what you'll build</div>
+                </div>
+
+                <div style="padding: 0 16px; margin-bottom: 20px; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px;">
+                    
+                    <!-- Goal 1: Spiritual -->
+                    <div class="goal-card" onclick="window.showGoalModal(0)" style="background: linear-gradient(135deg, rgba(147, 112, 219, 0.1), rgba(147, 112, 219, 0.05)); border: 2px solid rgba(147, 112, 219, 0.3);">
+                        <div class="goal-icon">🙏</div>
+                        <div class="goal-name">Spiritual</div>
+                        <div class="goal-desc">Inner Peace</div>
+                        <div class="goal-discover">✨ Explore</div>
+                    </div>
+
+                    <!-- Goal 2: Personal -->
+                    <div class="goal-card" onclick="window.showGoalModal(1)" style="background: linear-gradient(135deg, rgba(52, 152, 219, 0.1), rgba(52, 152, 219, 0.05)); border: 2px solid rgba(52, 152, 219, 0.3);">
+                        <div class="goal-icon">👤</div>
+                        <div class="goal-name">Personal</div>
+                        <div class="goal-desc">Better Relationships</div>
+                        <div class="goal-discover">✨ Explore</div>
+                    </div>
+
+                    <!-- Goal 3: Family -->
+                    <div class="goal-card" onclick="window.showGoalModal(2)" style="background: linear-gradient(135deg, rgba(231, 76, 60, 0.1), rgba(231, 76, 60, 0.05)); border: 2px solid rgba(231, 76, 60, 0.3);">
+                        <div class="goal-icon">❤️</div>
+                        <div class="goal-name">Family</div>
+                        <div class="goal-desc">Stronger Bonds</div>
+                        <div class="goal-discover">✨ Explore</div>
+                    </div>
+
+                    <!-- Goal 4: Health -->
+                    <div class="goal-card" onclick="window.showGoalModal(3)" style="background: linear-gradient(135deg, rgba(46, 204, 113, 0.1), rgba(46, 204, 113, 0.05)); border: 2px solid rgba(46, 204, 113, 0.3);">
+                        <div class="goal-icon">💪</div>
+                        <div class="goal-name">Health</div>
+                        <div class="goal-desc">Physical Wellness</div>
+                        <div class="goal-discover">✨ Explore</div>
+                    </div>
+
+                    <!-- Goal 5: Professional -->
+                    <div class="goal-card" onclick="window.showGoalModal(4)" style="background: linear-gradient(135deg, rgba(52, 73, 94, 0.1), rgba(52, 73, 94, 0.05)); border: 2px solid rgba(52, 73, 94, 0.3);">
+                        <div class="goal-icon">💼</div>
+                        <div class="goal-name">Professional</div>
+                        <div class="goal-desc">Career Growth</div>
+                        <div class="goal-discover">✨ Explore</div>
+                    </div>
+
+                    <!-- Goal 6: Education -->
+                    <div class="goal-card" onclick="window.showGoalModal(5)" style="background: linear-gradient(135deg, rgba(241, 196, 15, 0.1), rgba(241, 196, 15, 0.05)); border: 2px solid rgba(241, 196, 15, 0.3);">
+                        <div class="goal-icon">🎓</div>
+                        <div class="goal-name">Education</div>
+                        <div class="goal-desc">Knowledge Growth</div>
+                        <div class="goal-discover">✨ Explore</div>
+                    </div>
+
+                    <!-- Goal 7: Financial -->
+                    <div class="goal-card" onclick="window.showGoalModal(6)" style="background: linear-gradient(135deg, rgba(26, 188, 156, 0.1), rgba(26, 188, 156, 0.05)); border: 2px solid rgba(26, 188, 156, 0.3);">
+                        <div class="goal-icon">💰</div>
+                        <div class="goal-name">Financial</div>
+                        <div class="goal-desc">Smart Decisions</div>
+                        <div class="goal-discover">✨ Explore</div>
+                    </div>
+
+                    <!-- Goal 8: R&D -->
+                    <div class="goal-card" onclick="window.showGoalModal(7)" style="background: linear-gradient(135deg, rgba(155, 89, 182, 0.1), rgba(155, 89, 182, 0.05)); border: 2px solid rgba(155, 89, 182, 0.3);">
+                        <div class="goal-icon">🔬</div>
+                        <div class="goal-name">R&D</div>
+                        <div class="goal-desc">Innovation</div>
+                        <div class="goal-discover">✨ Explore</div>
+                    </div>
+
+                    <!-- Goal 9: Implementation -->
+                    <div class="goal-card" onclick="window.showGoalModal(8)" style="background: linear-gradient(135deg, rgba(230, 126, 34, 0.1), rgba(230, 126, 34, 0.05)); border: 2px solid rgba(230, 126, 34, 0.3);">
+                        <div class="goal-icon">⚙️</div>
+                        <div class="goal-name">Implementation</div>
+                        <div class="goal-desc">Execute Plans</div>
+                        <div class="goal-discover">✨ Explore</div>
+                    </div>
+
+                    <!-- Goal 10: Life -->
+                    <div class="goal-card" onclick="window.showGoalModal(9)" style="background: linear-gradient(135deg, rgba(233, 166, 33, 0.1), rgba(233, 166, 33, 0.05)); border: 2px solid rgba(233, 166, 33, 0.3);">
+                        <div class="goal-icon">🎯</div>
+                        <div class="goal-name">Life</div>
+                        <div class="goal-desc">Big Vision</div>
+                        <div class="goal-discover">✨ Explore</div>
+                    </div>
+
+                </div>
+
+                <div style="padding: 20px; text-align: center;">
+                    <button class="btn btn-primary" style="margin-top: 20px;" onclick="goToScreen('onboardingScreen2')">🚀 Start Your Journey</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Onboarding Screen 2: Your Journey -->
+        <div class="screen" id="onboardingScreen2">
+            <div class="header">
+                <div class="header-title">
+                    <span class="logo">🎯</span>
+                    Your Journey
+                </div>
+                <button class="header-btn" onclick="goToScreen('dashboardScreen')">✕</button>
+            </div>
+            <div class="content">
+                <div style="text-align: center; margin-bottom: 28px;">
+                    <div style="font-size: 32px; margin-bottom: 12px;">🏆</div>
+                    <div style="font-size: 20px; font-weight: 800; color: var(--primary); margin-bottom: 8px; letter-spacing: -1px;">Your Daily Life Coach</div>
+                    <div style="font-size: 13px; color: #666; line-height: 1.6;">One personalized task a day across 10 life areas.<br>Your transformation starts today.</div>
+                </div>
+
+                <!-- Month 1: Meet Your Coach -->
+                <div style="margin-bottom: 24px;">
+                    <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 14px;">
+                        <div style="font-size: 24px;">🌱</div>
+                        <div>
+                            <div style="font-size: 16px; font-weight: 700; color: var(--primary); letter-spacing: -0.3px;">MONTH 1: Meet Your Coach</div>
+                            <div style="font-size: 12px; color: #666; margin-top: 2px;">Build daily habits & momentum</div>
+                        </div>
+                    </div>
+
+                    <!-- Week 1 -->
+                    <div class="card" style="background: linear-gradient(135deg, rgba(52, 152, 219, 0.05), rgba(52, 152, 219, 0.02)); border: 2px solid rgba(52, 152, 219, 0.2); margin-bottom: 10px;">
+                        <div style="display: flex; gap: 12px; align-items: flex-start;">
+                            <div style="font-size: 20px;">📅</div>
+                            <div style="flex: 1;">
+                                <div style="font-weight: 700; color: var(--primary); margin-bottom: 6px; font-size: 14px;">Week 1: Meet Your Coach</div>
+                                <div style="font-size: 12px; color: #666; line-height: 1.5;">Your coach introduces itself with 1 task per goal, daily. You're establishing the routine and discovering what's possible.</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Week 2 -->
+                    <div class="card" style="background: linear-gradient(135deg, rgba(233, 166, 33, 0.05), rgba(233, 166, 33, 0.02)); border: 2px solid rgba(233, 166, 33, 0.2); margin-bottom: 10px;">
+                        <div style="display: flex; gap: 12px; align-items: flex-start;">
+                            <div style="font-size: 20px;">🔥</div>
+                            <div style="flex: 1;">
+                                <div style="font-weight: 700; color: var(--primary); margin-bottom: 6px; font-size: 14px;">Week 2: Momentum Starts</div>
+                                <div style="font-size: 12px; color: #666; line-height: 1.5;">You're on a roll! The habit feels natural. Your coach is learning your patterns. Small wins compound.</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Week 3 -->
+                    <div class="card" style="background: linear-gradient(135deg, rgba(46, 204, 113, 0.05), rgba(46, 204, 113, 0.02)); border: 2px solid rgba(46, 204, 113, 0.2); margin-bottom: 10px;">
+                        <div style="display: flex; gap: 12px; align-items: flex-start;">
+                            <div style="font-size: 20px;">✨</div>
+                            <div style="flex: 1;">
+                                <div style="font-weight: 700; color: var(--primary); margin-bottom: 6px; font-size: 14px;">Week 3: Real Changes Visible</div>
+                                <div style="font-size: 12px; color: #666; line-height: 1.5;">Others start noticing. Your progress is tangible. You feel different. Your coach celebrates your wins.</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Week 4 -->
+                    <div class="card" style="background: linear-gradient(135deg, var(--primary), #1a4d7a); color: white; border: 2px solid var(--primary); margin-bottom: 10px;">
+                        <div style="display: flex; gap: 12px; align-items: flex-start;">
+                            <div style="font-size: 20px;">🏆</div>
+                            <div style="flex: 1;">
+                                <div style="font-weight: 700; margin-bottom: 6px; font-size: 14px;">Week 4: You've Changed</div>
+                                <div style="font-size: 12px; opacity: 0.95; line-height: 1.5;">30 days. New habits. Stronger you. Your coach knows you intimately. You're not going back.</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Month 1 Stats -->
+                    <div style="background: linear-gradient(135deg, rgba(52, 152, 219, 0.1), rgba(52, 152, 219, 0.05)); padding: 16px; border-radius: 12px; margin-top: 12px;">
+                        <div style="font-size: 12px; font-weight: 700; color: var(--primary); margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.5px;">30-Day Milestone</div>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                            <div style="text-align: center;">
+                                <div style="font-size: 20px; font-weight: 800; color: var(--accent);">300+</div>
+                                <div style="font-size: 11px; color: #666; margin-top: 4px; font-weight: 600;">Tasks Completed</div>
+                            </div>
+                            <div style="text-align: center;">
+                                <div style="font-size: 20px; font-weight: 800; color: var(--secondary);">30</div>
+                                <div style="font-size: 11px; color: #666; margin-top: 4px; font-weight: 600;">Day Streak</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quarter 2: Growing Together -->
+                <div style="margin-bottom: 24px;">
+                    <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 14px;">
+                        <div style="font-size: 24px;">🌿</div>
+                        <div>
+                            <div style="font-size: 16px; font-weight: 700; color: var(--primary); letter-spacing: -0.3px;">QUARTER 2: Growing Together</div>
+                            <div style="font-size: 12px; color: #666; margin-top: 2px;">Coach knows you. Results compound.</div>
+                        </div>
+                    </div>
+
+                    <div class="card" style="background: linear-gradient(135deg, rgba(231, 76, 60, 0.05), rgba(231, 76, 60, 0.02)); border: 2px solid rgba(231, 76, 60, 0.2);">
+                        <div style="display: flex; gap: 12px; align-items: flex-start;">
+                            <div style="font-size: 20px;">💪</div>
+                            <div style="flex: 1;">
+                                <div style="font-weight: 700; color: var(--primary); margin-bottom: 6px; font-size: 14px;">After 90 Days</div>
+                                <div style="font-size: 12px; color: #666; line-height: 1.5;">900 tasks completed. Your coach knows you intimately. Multiple goals showing real results. Confidence soaring. Life improving visibly.</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="background: linear-gradient(135deg, rgba(231, 76, 60, 0.1), rgba(231, 76, 60, 0.05)); padding: 16px; border-radius: 12px; margin-top: 12px;">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                            <div style="text-align: center;">
+                                <div style="font-size: 20px; font-weight: 800; color: var(--accent);">900+</div>
+                                <div style="font-size: 11px; color: #666; margin-top: 4px; font-weight: 600;">Tasks Done</div>
+                            </div>
+                            <div style="text-align: center;">
+                                <div style="font-size: 20px; font-weight: 800; color: var(--secondary);">90</div>
+                                <div style="font-size: 11px; color: #666; margin-top: 4px; font-weight: 600;">Days Committed</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Full Year: Transformed -->
+                <div style="margin-bottom: 24px;">
+                    <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 14px;">
+                        <div style="font-size: 24px;">🌳</div>
+                        <div>
+                            <div style="font-size: 16px; font-weight: 700; color: var(--primary); letter-spacing: -0.3px;">FULL YEAR: Completely Transformed</div>
+                            <div style="font-size: 12px; color: #666; margin-top: 2px;">Your best self unlocked</div>
+                        </div>
+                    </div>
+
+                    <div class="card" style="background: linear-gradient(135deg, rgba(26, 188, 156, 0.05), rgba(26, 188, 156, 0.02)); border: 2px solid rgba(26, 188, 156, 0.2);">
+                        <div style="display: flex; gap: 12px; align-items: flex-start;">
+                            <div style="font-size: 20px;">👑</div>
+                            <div style="flex: 1;">
+                                <div style="font-weight: 700; color: var(--primary); margin-bottom: 6px; font-size: 14px;">After 365 Days</div>
+                                <div style="font-size: 12px; color: #666; line-height: 1.5;">3,650 tasks completed. All 10 goals transformed. Your coach has guided you through a complete life redesign. You are your best self.</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="background: linear-gradient(135deg, rgba(26, 188, 156, 0.1), rgba(26, 188, 156, 0.05)); padding: 16px; border-radius: 12px; margin-top: 12px;">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                            <div style="text-align: center;">
+                                <div style="font-size: 20px; font-weight: 800; color: var(--accent);">3,650+</div>
+                                <div style="font-size: 11px; color: #666; margin-top: 4px; font-weight: 600;">Tasks Mastered</div>
+                            </div>
+                            <div style="text-align: center;">
+                                <div style="font-size: 20px; font-weight: 800; color: var(--secondary);">365</div>
+                                <div style="font-size: 11px; color: #666; margin-top: 4px; font-weight: 600;">Days Transformed</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Final Message -->
+                <div style="background: linear-gradient(135deg, var(--gradient-warm)); color: white; padding: 20px; border-radius: 14px; text-align: center; margin-bottom: 24px;">
+                    <div style="font-size: 16px; font-weight: 700; margin-bottom: 8px; letter-spacing: -0.3px;">Your Coach is Ready</div>
+                    <div style="font-size: 13px; opacity: 0.95; line-height: 1.6;">Every day matters. Every small task compounds. In 365 days, you won't recognize the person you've become.</div>
+                </div>
+
+                <button class="btn btn-primary" style="margin-top: 0;" onclick="goToScreen('dashboardScreen')">🚀 Start Your Coaching Journey</button>
+            </div>
+        </div>
+
+        <!-- Dashboard Screen -->
+        <div class="screen" id="dashboardScreen">
+            <div class="header">
+                <div class="header-title">
+                    <span class="logo">🚀</span>
+                    RiseCraft
+                </div>
+                <button class="header-btn" onclick="openModal('settingsModal')">⚙️</button>
+            </div>
+            <div class="content">
+                <div class="dashboard-header">
+                    <div class="dashboard-date">
+                        <div>
+                            <div class="date-greeting">Welcome Back! 👋</div>
+                            <div class="date-day" id="currentDate">Today</div>
+                            <div class="date-text" id="currentDateFull">December 7, 2025</div>
+                        </div>
+                        <div style="text-align: right;">
+                            <div class="streak-icon">🔥</div>
+                            <div class="streak-number">24</div>
+                            <div class="streak-label">Day Streak</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="task-stats">
+                    <div class="task-stat">
+                        <div class="task-stat-number">7/10</div>
+                        <div class="task-stat-label">Completed</div>
+                    </div>
+                    <div class="task-stat">
+                        <div class="task-stat-number">70%</div>
+                        <div class="task-stat-label">Progress</div>
+                    </div>
+                    <div class="task-stat">
+                        <div class="task-stat-number">3</div>
+                        <div class="task-stat-label">Remaining</div>
+                    </div>
+                </div>
+
+                <div style="margin-bottom: 20px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                        <span style="font-size: 13px; font-weight: 600; color: var(--primary);">Daily Goal Progress</span>
+                        <span style="font-size: 13px; font-weight: 600; color: var(--accent);">70%</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 70%;"></div>
+                    </div>
+                </div>
+
+                <h3 style="color: var(--primary); font-size: 15px; font-weight: 700; margin-bottom: 14px; text-transform: uppercase; letter-spacing: 0.5px;">Today's Goals</h3>
+                <div id="tasksList"></div>
+            </div>
+            <div class="nav-tabs">
+                <button class="nav-tab active" onclick="switchNav(this, 'dashboardScreen')">📋 TODAY</button>
+                <button class="nav-tab" onclick="switchNav(this, 'progressScreen')">📊 PROGRESS</button>
+                <button class="nav-tab" onclick="switchNav(this, 'profileScreen')">👤 PROFILE</button>
+            </div>
+        </div>
+
+        <!-- Progress Screen -->
+        <div class="screen" id="progressScreen">
+            <div class="header">
+                <div class="header-title">
+                    <span class="logo">📊</span>
+                    Progress & Streaks
+                </div>
+                <button class="header-btn" onclick="openModal('settingsModal')">⚙️</button>
+            </div>
+            <div class="content">
+                <div class="stat-box">
+                    <div class="stat-number">24</div>
+                    <div class="stat-label">Current Streak Days</div>
+                </div>
+
+                <div class="stat-box cool">
+                    <div class="stat-number">68%</div>
+                    <div class="stat-label">Completion Rate (30 days)</div>
+                </div>
+
+                <!-- Catch-Up Section -->
+                <div style="background: linear-gradient(135deg, rgba(233, 166, 33, 0.1), rgba(42, 157, 143, 0.1)); border: 2px solid var(--accent); border-radius: 16px; padding: 20px; margin-bottom: 20px; cursor: pointer; margin-top: 20px;" onclick="window.openModal('missedTasksModal')">
+                    <div style="display: flex; gap: 12px; align-items: flex-start;">
+                        <div style="font-size: 32px;">⚡</div>
+                        <div style="flex: 1;">
+                            <div style="font-weight: 700; color: var(--primary); margin-bottom: 8px; font-size: 15px;">Quick Boost Available!</div>
+                            <div style="font-size: 13px; color: #666; margin-bottom: 12px; line-height: 1.5;">You have <span style="font-weight: 700; color: var(--accent);">3 missed tasks</span> from the past week.</div>
+                            <div style="background: white; padding: 10px 12px; border-radius: 8px; margin-bottom: 12px;">
+                                <div style="font-size: 12px; color: #666; margin-bottom: 4px;">Complete them to boost your rate:</div>
+                                <div style="display: flex; justify-content: space-between; align-items: center;">
+                                    <div>
+                                        <span style="font-size: 12px; color: #999;">Current:</span>
+                                        <span style="font-weight: 700; color: var(--primary); font-size: 14px; margin-left: 4px;">68%</span>
+                                    </div>
+                                    <div style="font-size: 16px; color: var(--accent);">→</div>
+                                    <div>
+                                        <span style="font-size: 12px; color: #999;">Potential:</span>
+                                        <span style="font-weight: 700; color: var(--secondary); font-size: 14px; margin-left: 4px;">75%</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <button class="btn btn-secondary" style="width: 100%; padding: 10px 12px; margin-top: 0; font-size: 13px; font-weight: 700;" onclick="event.stopPropagation(); window.openModal('missedTasksModal')">🎯 View Missed Tasks</button>
+                        </div>
+                    </div>
+                </div>
+
+                <h3 style="margin-top: 24px; margin-bottom: 14px; color: var(--primary); font-size: 15px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">Goal Categories</h3>
+
+                <div class="card">
+                    <div class="card-title">🙏 Spiritual Goal</div>
+                    <div class="progress-bar"><div class="progress-fill" style="width: 85%;"></div></div>
+                    <div style="font-size: 12px; color: #666; margin-top: 8px;">25/30 tasks completed</div>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">💼 Professional Goal</div>
+                    <div class="progress-bar"><div class="progress-fill" style="width: 72%;"></div></div>
+                    <div style="font-size: 12px; color: #666; margin-top: 8px;">21/30 tasks completed</div>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">❤️ Family Goal</div>
+                    <div class="progress-bar"><div class="progress-fill" style="width: 90%;"></div></div>
+                    <div style="font-size: 12px; color: #666; margin-top: 8px;">27/30 tasks completed</div>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">💪 Health Goal</div>
+                    <div class="progress-bar"><div class="progress-fill" style="width: 60%;"></div></div>
+                    <div style="font-size: 12px; color: #666; margin-top: 8px;">18/30 tasks completed</div>
+                </div>
+            </div>
+            <div class="nav-tabs">
+                <button class="nav-tab" onclick="switchNav(this, 'dashboardScreen')">📋 TODAY</button>
+                <button class="nav-tab active" onclick="switchNav(this, 'progressScreen')">📊 PROGRESS</button>
+                <button class="nav-tab" onclick="switchNav(this, 'profileScreen')">👤 PROFILE</button>
+            </div>
+        </div>
+
+        <!-- Profile Screen -->
+        <div class="screen" id="profileScreen">
+            <div class="header">
+                <div class="header-title">
+                    <span class="logo">👤</span>
+                    Profile
+                </div>
+                <button class="header-btn" onclick="openModal('settingsModal')">⚙️</button>
+            </div>
+            <div class="content">
+                <div style="text-align: center; margin-bottom: 28px; padding: 24px; background: linear-gradient(135deg, #f5f7fa 0%, #e8f0f5 100%); border-radius: 16px;">
+                    <div style="font-size: 72px; margin-bottom: 14px;">👨</div>
+                    <div style="font-size: 20px; font-weight: 700; color: var(--primary); letter-spacing: -0.5px;">John Doe</div>
+                    <div style="font-size: 13px; color: #666; margin-top: 4px;">Student Category</div>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">📧 Account Email</div>
+                    <div class="card-text"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="7c16131412521813193c19111d1510521f1311">[email&#160;protected]</a></div>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">📅 Member Since</div>
+                    <div class="card-text">November 15, 2025</div>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">💳 Subscription</div>
+                    <div style="margin-top: 8px;">
+                        <span class="badge badge-success">Free Trial (18 days remaining)</span>
+                    </div>
+                </div>
+
+                <div style="margin-top: 32px;">
+                    <h3 style="color: var(--primary); margin-bottom: 16px; font-weight: 700; font-size: 15px; text-transform: uppercase; letter-spacing: 0.5px;">Quick Actions</h3>
+                    <button class="btn btn-secondary" onclick="openModal('premiumUpgradeModal')">✨ Upgrade to Premium</button>
+                    <button class="btn" style="background: #e74c3c; color: white; margin-top: 12px;" onclick="goToScreen('loginScreen')">🚪 Sign Out</button>
+                </div>
+
+                <div style="margin-top: 32px; padding: 24px; background: linear-gradient(135deg, rgba(233, 166, 33, 0.1), rgba(42, 157, 143, 0.1)); border: 2px solid var(--accent); border-radius: 16px;">
+                    <div style="display: flex; gap: 12px; margin-bottom: 16px;">
+                        <div style="font-size: 32px;">🧠</div>
+                        <div>
+                            <div style="font-size: 16px; font-weight: 800; color: var(--primary); letter-spacing: -0.5px;">Mind Smart Academy</div>
+                            <div style="font-size: 12px; color: var(--accent); font-weight: 600; margin-top: 2px;">Serving since [X] years</div>
+                        </div>
+                    </div>
+
+                    <div style="font-size: 13px; color: #666; line-height: 1.8; margin-bottom: 16px;">
+                        <p style="margin-bottom: 12px;">We at Mind Smart Academy manifest <span style="font-weight: 600; color: var(--primary);">compassion, mutual trust & humor</span> in our interaction by providing a healthy & sustainable environment.</p>
+
+                        <div style="margin-bottom: 12px;">
+                            <div style="font-weight: 700; color: var(--primary); margin-bottom: 10px; font-size: 13px;">🎯 Our Areas of Expertise</div>
+                            <div>
+                                <div style="margin-bottom: 12px; padding: 10px; background: white; border-radius: 8px;">
+                                    <span style="font-weight: 700; color: var(--primary); font-size: 13px;">COACHING</span>
+                                    <p style="font-size: 12px; color: #666; margin-top: 4px; line-height: 1.5;">Making our clients understand and realize their inner potentials towards their way forward.</p>
+                                </div>
+                                <div style="margin-bottom: 12px; padding: 10px; background: white; border-radius: 8px;">
+                                    <span style="font-weight: 700; color: var(--primary); font-size: 13px;">MENTORING</span>
+                                    <p style="font-size: 12px; color: #666; margin-top: 4px; line-height: 1.5;">Advancing our interactive mentoring services to overcome inner blockages for personal excellence.</p>
+                                </div>
+                                <div style="padding: 10px; background: white; border-radius: 8px;">
+                                    <span style="font-weight: 700; color: var(--primary); font-size: 13px;">MENDING</span>
+                                    <p style="font-size: 12px; color: #666; margin-top: 4px; line-height: 1.5;">Realizing the importance of committed mind, body, confident & successful mending performances in all walks of life.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div style="background: white; padding: 14px; border-radius: 8px; border-left: 4px solid var(--secondary); margin-top: 12px;">
+                            <p style="font-size: 12px; color: #666; line-height: 1.6;"><span style="font-weight: 700; color: var(--primary);">✨ Our Promise:</span> Our effective & productive sessions transform the whole body and mind progress towards the limitless horizons of your future.</p>
+                        </div>
+                    </div>
+
+                    <div style="display: flex; gap: 8px; margin-top: 16px;">
+                        <button class="btn btn-text" style="flex: 1; padding: 8px; margin-top: 0; font-size: 12px; text-transform: none;">Learn More</button>
+                        <button class="btn btn-text" style="flex: 1; padding: 8px; margin-top: 0; font-size: 12px; text-transform: none;">Contact Us</button>
+                    </div>
+                </div>
+            </div>
+            <div class="nav-tabs">
+                <button class="nav-tab" onclick="switchNav(this, 'dashboardScreen')">📋 TODAY</button>
+                <button class="nav-tab" onclick="switchNav(this, 'progressScreen')">📊 PROGRESS</button>
+                <button class="nav-tab active" onclick="switchNav(this, 'profileScreen')">👤 PROFILE</button>
+            </div>
+        </div>
+
+        <!-- Admin Dashboard -->
+        <div class="screen" id="adminDashboardScreen">
+            <div class="header">
+                <button class="header-btn" onclick="goToScreen('loginScreen')">←</button>
+                <div class="header-title">
+                    <span class="logo">⚙️</span>
+                    Admin Dashboard
+                </div>
+                <div style="width: 32px;"></div>
+            </div>
+            <div class="content">
+                <div style="margin-bottom: 20px;">
+                    <h3 style="color: var(--primary); font-size: 13px; font-weight: 700; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.5px;">Overview</h3>
+                    
+                    <div class="stat-box">
+                        <div class="stat-number">324</div>
+                        <div class="stat-label">Total Active Users</div>
+                    </div>
+
+                    <div class="stat-box cool">
+                        <div class="stat-number">14,600</div>
+                        <div class="stat-label">Total Tasks Available</div>
+                    </div>
+                </div>
+
+                <h3 style="color: var(--primary); font-size: 13px; font-weight: 700; margin-bottom: 14px; text-transform: uppercase; letter-spacing: 0.5px;">Management</h3>
+
+                <div class="grid">
+                    <div class="grid-item" onclick="goToScreen('adminUsersScreen')">
+                        <div class="grid-item-icon">👥</div>
+                        <div class="grid-item-text">Users</div>
+                    </div>
+                    <div class="grid-item" onclick="goToScreen('adminTasksScreen')">
+                        <div class="grid-item-icon">📝</div>
+                        <div class="grid-item-text">Tasks</div>
+                    </div>
+                    <div class="grid-item" onclick="goToScreen('adminAnalyticsScreen')">
+                        <div class="grid-item-icon">📊</div>
+                        <div class="grid-item-text">Analytics</div>
+                    </div>
+                    <div class="grid-item" onclick="openModal('customTaskModal')">
+                        <div class="grid-item-icon">➕</div>
+                        <div class="grid-item-text">Custom Task</div>
+                    </div>
+                </div>
+
+                <h3 style="color: var(--primary); font-size: 13px; font-weight: 700; margin-bottom: 14px; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 20px;">Quick Actions</h3>
+
+                <button class="btn btn-secondary" onclick="openModal('uploadTaskModal')">📤 Bulk Upload Tasks</button>
+                <button class="btn" style="background: linear-gradient(135deg, #e74c3c, #c0392b); color: white; margin-top: 12px;" onclick="goToScreen('loginScreen')">🚪 Logout</button>
+            </div>
+        </div>
+
+        <!-- Admin Users Screen -->
+        <div class="screen" id="adminUsersScreen">
+            <div class="header">
+                <button class="header-btn" onclick="goToScreen('adminDashboardScreen')">←</button>
+                <div class="header-title">Users Management</div>
+                <button class="header-btn" onclick="alert('Add new user feature coming soon')">➕</button>
+            </div>
+            <div class="content">
+                <div style="margin-bottom: 16px;">
+                    <input type="text" placeholder="🔍 Search users..." style="margin-bottom: 0;">
+                </div>
+
+                <div style="margin-bottom: 16px;">
+                    <select style="margin-bottom: 0;">
+                        <option>Filter by Status: All</option>
+                        <option>Active Users</option>
+                        <option>Trial Users</option>
+                        <option>Premium Users</option>
+                    </select>
+                </div>
+
+                <h3 style="color: var(--primary); font-size: 13px; font-weight: 700; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.5px;">Users List</h3>
+
+                <div class="card">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <div class="card-title">👨 John Doe</div>
+                            <div class="card-text"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="e48e8b8c8aca808b81a48189858d88ca878b89">[email&#160;protected]</a></div>
+                            <div style="display: flex; gap: 8px; margin-top: 8px;">
+                                <span class="badge badge-primary">Student</span>
+                                <span class="badge badge-success">Active</span>
+                            </div>
+                        </div>
+                        <div style="text-align: right;">
+                            <div style="font-size: 18px; font-weight: 700; color: var(--accent);">24</div>
+                            <div style="font-size: 11px; color: #999;">day streak</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <div class="card-title">👩 Jane Smith</div>
+                            <div class="card-text"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="7319121d165d001e1a071b33161e121a1f5d101c1e">[email&#160;protected]</a></div>
+                            <div style="display: flex; gap: 8px; margin-top: 8px;">
+                                <span class="badge badge-primary">Adult</span>
+                                <span class="badge badge-success">Premium</span>
+                            </div>
+                        </div>
+                        <div style="text-align: right;">
+                            <div style="font-size: 18px; font-weight: 700; color: var(--accent);">15</div>
+                            <div style="font-size: 11px; color: #999;">day streak</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <div class="card-title">👨‍🦰 Robert Lee</div>
+                            <div class="card-text"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="dfadb0bdbaadabf1b3baba9fbab2beb6b3f1bcb0b2">[email&#160;protected]</a></div>
+                            <div style="display: flex; gap: 8px; margin-top: 8px;">
+                                <span class="badge badge-primary">Parent</span>
+                                <span class="badge badge-warning">Trial</span>
+                            </div>
+                        </div>
+                        <div style="text-align: right;">
+                            <div style="font-size: 18px; font-weight: 700; color: var(--accent);">7</div>
+                            <div style="font-size: 11px; color: #999;">day streak</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <div class="card-title">👵 Maria Garcia</div>
+                            <div class="card-text"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="dcb1bdaeb5bdf2bbbdaebfb5bd9cb9b1bdb5b0f2bfb3b1">[email&#160;protected]</a></div>
+                            <div style="display: flex; gap: 8px; margin-top: 8px;">
+                                <span class="badge badge-primary">Esteemed</span>
+                                <span class="badge badge-success">Premium</span>
+                            </div>
+                        </div>
+                        <div style="text-align: right;">
+                            <div style="font-size: 18px; font-weight: 700; color: var(--accent);">32</div>
+                            <div style="font-size: 11px; color: #999;">day streak</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Admin Tasks Screen -->
+        <div class="screen" id="adminTasksScreen">
+            <div class="header">
+                <button class="header-btn" onclick="goToScreen('adminDashboardScreen')">←</button>
+                <div class="header-title">Task Management</div>
+                <button class="header-btn" onclick="openModal('uploadTaskModal')">➕</button>
+            </div>
+            <div class="content">
+                <h3 style="color: var(--primary); font-size: 13px; font-weight: 700; margin-bottom: 14px; text-transform: uppercase; letter-spacing: 0.5px;">Goal Categories - Task Status</h3>
+
+                <div class="card">
+                    <div class="card-title">🙏 Spiritual Goal</div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
+                        <div class="card-text">365 tasks loaded</div>
+                        <button class="btn" style="width: auto; padding: 6px 12px; margin-top: 0; font-size: 12px; background: var(--secondary); color: white;" onclick="openModal('uploadTaskModal')">Edit</button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">👤 Personal Goal</div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
+                        <div class="card-text">365 tasks loaded</div>
+                        <button class="btn" style="width: auto; padding: 6px 12px; margin-top: 0; font-size: 12px; background: var(--secondary); color: white;" onclick="openModal('uploadTaskModal')">Edit</button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">❤️ Family Goal</div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
+                        <div class="card-text">365 tasks loaded</div>
+                        <button class="btn" style="width: auto; padding: 6px 12px; margin-top: 0; font-size: 12px; background: var(--secondary); color: white;" onclick="openModal('uploadTaskModal')">Edit</button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">💪 Health Goal</div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
+                        <div class="card-text">365 tasks loaded</div>
+                        <button class="btn" style="width: auto; padding: 6px 12px; margin-top: 0; font-size: 12px; background: var(--secondary); color: white;" onclick="openModal('uploadTaskModal')">Edit</button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">💼 Professional Goal</div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
+                        <div class="card-text">365 tasks loaded</div>
+                        <button class="btn" style="width: auto; padding: 6px 12px; margin-top: 0; font-size: 12px; background: var(--secondary); color: white;" onclick="openModal('uploadTaskModal')">Edit</button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">🎓 Educational Goal</div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
+                        <div class="card-text">365 tasks loaded</div>
+                        <button class="btn" style="width: auto; padding: 6px 12px; margin-top: 0; font-size: 12px; background: var(--secondary); color: white;" onclick="openModal('uploadTaskModal')">Edit</button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">💰 Financial Goal</div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
+                        <div class="card-text">365 tasks loaded</div>
+                        <button class="btn" style="width: auto; padding: 6px 12px; margin-top: 0; font-size: 12px; background: var(--secondary); color: white;" onclick="openModal('uploadTaskModal')">Edit</button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">🔬 R&D Goal</div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
+                        <div class="card-text">365 tasks loaded</div>
+                        <button class="btn" style="width: auto; padding: 6px 12px; margin-top: 0; font-size: 12px; background: var(--secondary); color: white;" onclick="openModal('uploadTaskModal')">Edit</button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">⚙️ Implementation Goal</div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
+                        <div class="card-text">365 tasks loaded</div>
+                        <button class="btn" style="width: auto; padding: 6px 12px; margin-top: 0; font-size: 12px; background: var(--secondary); color: white;" onclick="openModal('uploadTaskModal')">Edit</button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">🎯 Life Goal</div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
+                        <div class="card-text">365 tasks loaded</div>
+                        <button class="btn" style="width: auto; padding: 6px 12px; margin-top: 0; font-size: 12px; background: var(--secondary); color: white;" onclick="openModal('uploadTaskModal')">Edit</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Admin Analytics Screen -->
+        <div class="screen" id="adminAnalyticsScreen">
+            <div class="header">
+                <button class="header-btn" onclick="goToScreen('adminDashboardScreen')">←</button>
+                <div class="header-title">Analytics & Reports</div>
+                <div style="width: 32px;"></div>
+            </div>
+            <div class="content">
+                <h3 style="color: var(--primary); font-size: 13px; font-weight: 700; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.5px;">Key Metrics</h3>
+
+                <div class="stat-box">
+                    <div class="stat-number">324</div>
+                    <div class="stat-label">Total Active Users</div>
+                </div>
+
+                <div class="stat-box cool">
+                    <div class="stat-number">72.4%</div>
+                    <div class="stat-label">Avg Completion Rate</div>
+                </div>
+
+                <div class="stat-box" style="background: linear-gradient(135deg, #e74c3c, #c0392b);">
+                    <div class="stat-number">28</div>
+                    <div class="stat-label">Avg Streak Days</div>
+                </div>
+
+                <h3 style="margin-top: 24px; margin-bottom: 14px; color: var(--primary); font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">User Breakdown by Category</h3>
+
+                <div class="card">
+                    <div class="card-title">👨‍🎓 Students</div>
+                    <div class="progress-bar"><div class="progress-fill" style="width: 39.5%;"></div></div>
+                    <div style="font-size: 12px; color: #666; margin-top: 8px;">128 users (39.5%)</div>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">👨‍👩‍👧 Parents</div>
+                    <div class="progress-bar"><div class="progress-fill" style="width: 29.6%;"></div></div>
+                    <div style="font-size: 12px; color: #666; margin-top: 8px;">96 users (29.6%)</div>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">💼 Adults</div>
+                    <div class="progress-bar"><div class="progress-fill" style="width: 22.2%;"></div></div>
+                    <div style="font-size: 12px; color: #666; margin-top: 8px;">72 users (22.2%)</div>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">👴 Esteemed</div>
+                    <div class="progress-bar"><div class="progress-fill" style="width: 8.6%;"></div></div>
+                    <div style="font-size: 12px; color: #666; margin-top: 8px;">28 users (8.6%)</div>
+                </div>
+
+                <h3 style="margin-top: 24px; margin-bottom: 14px; color: var(--primary); font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">Subscription Status</h3>
+
+                <div class="card">
+                    <div class="card-title">💚 Free Trial</div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 8px;">
+                        <div class="card-text">185 users</div>
+                        <span class="badge badge-warning">57%</span>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">✨ Premium</div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 8px;">
+                        <div class="card-text">139 users</div>
+                        <span class="badge badge-success">43%</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Goal Detail Modal -->
+        <div class="modal" id="goalDetailModal">
+            <div class="modal-content">
+                <!-- Content will be inserted by JavaScript -->
+            </div>
+        </div>
+
+        <!-- Settings Modal -->
+        <div class="modal" id="settingsModal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    ⚙️ Settings
+                    <button class="close-btn" onclick="closeModal('settingsModal')">×</button>
+                </div>
+                <div class="form-group">
+                    <label>Notification Time</label>
+                    <input type="time" value="00:00">
+                </div>
+                <div class="form-group">
+                    <label>Dark Mode</label>
+                    <div style="display: flex; gap: 12px; align-items: center;">
+                        <input type="checkbox" style="width: auto;">
+                        <span style="font-size: 14px;">Enable Dark Mode</span>
+                    </div>
+                </div>
+                <button class="btn btn-primary" onclick="closeModal('settingsModal')">💾 Save Settings</button>
+            </div>
+        </div>
+
+        <!-- Premium Upgrade Modal -->
+        <div class="modal" id="premiumUpgradeModal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    ✨ Choose Your Plan
+                    <button class="close-btn" onclick="closeModal('premiumUpgradeModal')">×</button>
+                </div>
+
+                <h3 style="color: var(--primary); font-size: 14px; font-weight: 700; margin-bottom: 20px; text-align: center; text-transform: uppercase; letter-spacing: 0.5px;">Select Your Subscription</h3>
+
+                <!-- Free Plan -->
+                <div class="card" style="border: 3px solid var(--border); margin-bottom: 16px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                        <div class="card-title" style="margin-bottom: 0;">💚 Free Plan</div>
+                        <span class="badge badge-success">Current</span>
+                    </div>
+                    <div style="font-size: 20px; font-weight: 700; color: var(--primary); margin-bottom: 8px;">Always Free</div>
+                    <div class="card-text" style="margin-bottom: 16px;">30 days trial then limited features</div>
+                    
+                    <div style="background: #f8f9fa; padding: 12px; border-radius: 8px; margin-bottom: 12px;">
+                        <div style="font-size: 12px; font-weight: 600; color: var(--primary); margin-bottom: 8px;">Features:</div>
+                        <div style="font-size: 12px; color: #666; line-height: 1.8;">
+                            ✓ All 10 goal categories<br>
+                            ✓ Daily task tracking<br>
+                            ✓ Progress & streaks<br>
+                            ✓ Basic analytics
+                        </div>
+                    </div>
+                    
+                    <button class="btn btn-text" style="margin-top: 0; padding: 8px; font-size: 12px; cursor: default;" onclick="alert('You are already on the free plan')">Currently Active</button>
+                </div>
+
+                <!-- Pricing Plans Comparison -->
+                <h3 style="color: var(--primary); font-size: 13px; font-weight: 700; margin-bottom: 14px; margin-top: 24px; text-transform: uppercase; letter-spacing: 0.5px;">Premium Plans</h3>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                    <!-- Monthly Plan -->
+                    <div class="card" style="border: 2.5px solid var(--accent);">
+                        <div style="text-align: center; margin-bottom: 12px;">
+                            <div style="font-size: 16px; font-weight: 700; color: var(--primary); margin-bottom: 4px;">Monthly</div>
+                            <div style="font-size: 24px; font-weight: 800; color: var(--accent);">₹30</div>
+                            <div style="font-size: 11px; color: #666; margin-top: 4px;">per month</div>
+                        </div>
+                        
+                        <div style="background: rgba(233, 166, 33, 0.05); padding: 10px; border-radius: 6px; margin-bottom: 12px;">
+                            <div style="font-size: 11px; font-weight: 600; color: var(--primary); margin-bottom: 6px;">Includes:</div>
+                            <div style="font-size: 11px; color: #666; line-height: 1.6;">
+                                ✓ Advanced analytics<br>
+                                ✓ Custom goals<br>
+                                ✓ Insights<br>
+                                ✓ Priority support
+                            </div>
+                        </div>
+                        
+                        <button class="btn btn-primary" style="font-size: 13px; padding: 12px;" onclick="alert('💳 Upgrading to Monthly Plan\n\n₹30/month\n\nProcessing payment...\n\n✅ Success! Premium activated')">Subscribe</button>
+                    </div>
+
+                    <!-- Yearly Plan -->
+                    <div class="card" style="border: 2.5px solid var(--secondary); background: linear-gradient(135deg, rgba(42, 157, 143, 0.05) 0%, rgba(233, 166, 33, 0.05) 100%);">
+                        <div style="text-align: center; margin-bottom: 12px; position: relative;">
+                            <div style="position: absolute; top: -8px; right: 8px; background: var(--gradient-cool); color: white; padding: 4px 10px; border-radius: 12px; font-size: 10px; font-weight: 700;">BEST VALUE</div>
+                            <div style="font-size: 16px; font-weight: 700; color: var(--primary); margin-bottom: 4px;">Yearly</div>
+                            <div style="font-size: 24px; font-weight: 800; color: var(--secondary);">₹299</div>
+                            <div style="font-size: 11px; color: #666; margin-top: 4px;">₹24.92/month</div>
+                        </div>
+                        
+                        <div style="background: linear-gradient(135deg, rgba(42, 157, 143, 0.1), rgba(233, 166, 33, 0.1)); padding: 10px; border-radius: 6px; margin-bottom: 12px;">
+                            <div style="font-size: 11px; font-weight: 600; color: var(--primary); margin-bottom: 6px;">Everything + Premium</div>
+                            <div style="font-size: 11px; color: #666; line-height: 1.6;">
+                                ✓ Full year access<br>
+                                ✓ Best price per month<br>
+                                ✓ Auto renewal<br>
+                                ✓ Cancel anytime
+                            </div>
+                        </div>
+                        
+                        <button class="btn btn-secondary" style="font-size: 13px; padding: 12px;" onclick="alert('💳 Upgrading to Yearly Plan\n\n₹299/year\n\nProcessing payment...\n\n✅ Success! Premium activated for 1 year')">Subscribe</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Custom Task Modal -->
+        <div class="modal" id="customTaskModal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    ➕ Assign Custom Task
+                    <button class="close-btn" onclick="closeModal('customTaskModal')">×</button>
+                </div>
+                <div class="form-group">
+                    <label>Select User</label>
+                    <select>
+                        <option>John Doe (Student)</option>
+                        <option>Jane Smith (Adult)</option>
+                        <option>Robert Lee (Parent)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Task Goal Category</label>
+                    <select>
+                        <option>Spiritual Goal</option>
+                        <option>Personal Goal</option>
+                        <option>Family Goal</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Task Description</label>
+                    <input type="text" placeholder="Enter task description">
+                </div>
+                <button class="btn btn-primary" onclick="closeModal('customTaskModal')">✨ Assign Task</button>
+            </div>
+        </div>
+
+        <!-- Missed Tasks Modal -->
+        <div class="modal" id="missedTasksModal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    🎯 Catch-Up Challenge
+                    <button class="close-btn" onclick="window.closeModal('missedTasksModal')">×</button>
+                </div>
+
+                <div style="background: linear-gradient(135deg, var(--accent), #f39c12); color: white; padding: 16px; border-radius: 12px; margin-bottom: 20px; text-align: center;">
+                    <div style="font-size: 28px; margin-bottom: 8px;">💪</div>
+                    <div style="font-size: 13px; font-weight: 600; margin-bottom: 4px;">You're Close to Your Best Rate!</div>
+                    <div style="font-size: 12px; opacity: 0.9;">Complete 1 task per category today to reach <span style="font-weight: 700;">75%</span></div>
+                </div>
+
+                <div style="background: rgba(233, 166, 33, 0.1); border-left: 4px solid var(--accent); padding: 12px; border-radius: 8px; margin-bottom: 20px;">
+                    <div style="font-size: 12px; color: var(--primary); font-weight: 600;">💡 Tip</div>
+                    <div style="font-size: 12px; color: #666; margin-top: 4px;">You can complete 1 task per category per day. Come back tomorrow to catch up more!</div>
+                </div>
+
+                <!-- Spiritual Goal -->
+                <div style="margin-bottom: 20px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                        <div style="font-weight: 700; color: var(--primary); font-size: 14px;">🙏 Spiritual Goal</div>
+                        <div style="font-size: 12px; background: rgba(233, 166, 33, 0.15); color: var(--accent); padding: 4px 8px; border-radius: 6px; font-weight: 600;">1/3 done</div>
+                    </div>
+                    <div class="task-card spiritualTask1" onclick="window.completeCatchUpTask(this, 'spiritual')">
+                        <div class="task-content">
+                            <div class="task-category">Spiritual Goal</div>
+                            <div class="task-text">Daily reflection practice</div>
+                            <div class="task-time">Missed on Dec 4, 2025</div>
+                        </div>
+                        <div class="task-checkbox"></div>
+                    </div>
+                    <div style="font-size: 11px; color: #999; text-align: center; margin-top: 8px; padding: 8px; background: #f8f9fa; border-radius: 6px;">
+                        <span id="spiritualStatus">✅ Slot Available</span>
+                    </div>
+                </div>
+
+                <!-- Health Goal -->
+                <div style="margin-bottom: 20px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                        <div style="font-weight: 700; color: var(--primary); font-size: 14px;">💪 Health Goal</div>
+                        <div style="font-size: 12px; background: rgba(233, 166, 33, 0.15); color: var(--accent); padding: 4px 8px; border-radius: 6px; font-weight: 600;">0/2 done</div>
+                    </div>
+                    <div class="task-card healthTask1" onclick="window.completeCatchUpTask(this, 'health')">
+                        <div class="task-content">
+                            <div class="task-category">Health Goal</div>
+                            <div class="task-text">30 mins exercise</div>
+                            <div class="task-time">Missed on Dec 3, 2025</div>
+                        </div>
+                        <div class="task-checkbox"></div>
+                    </div>
+                    <div style="font-size: 11px; color: #999; text-align: center; margin-top: 8px; padding: 8px; background: #f8f9fa; border-radius: 6px;">
+                        <span id="healthStatus">✅ Slot Available</span>
+                    </div>
+                </div>
+
+                <!-- Professional Goal -->
+                <div style="margin-bottom: 20px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                        <div style="font-weight: 700; color: var(--primary); font-size: 14px;">💼 Professional Goal</div>
+                        <div style="font-size: 12px; background: rgba(233, 166, 33, 0.15); color: var(--accent); padding: 4px 8px; border-radius: 6px; font-weight: 600;">0/1 done</div>
+                    </div>
+                    <div class="task-card professionalTask1" onclick="window.completeCatchUpTask(this, 'professional')">
+                        <div class="task-content">
+                            <div class="task-category">Professional Goal</div>
+                            <div class="task-text">Work on key project</div>
+                            <div class="task-time">Missed on Dec 2, 2025</div>
+                        </div>
+                        <div class="task-checkbox"></div>
+                    </div>
+                    <div style="font-size: 11px; color: #999; text-align: center; margin-top: 8px; padding: 8px; background: #f8f9fa; border-radius: 6px;">
+                        <span id="professionalStatus">✅ Slot Available</span>
+                    </div>
+                </div>
+
+                <div style="background: linear-gradient(135deg, #ecf0f1, #e8eef2); padding: 14px; border-radius: 12px; margin-bottom: 20px; text-align: center;">
+                    <div style="font-size: 24px; margin-bottom: 8px;">🏆</div>
+                    <div style="font-size: 13px; font-weight: 600; color: var(--primary); margin-bottom: 4px;">Catch-Up Bonus!</div>
+                    <div style="font-size: 12px; color: #666;">Complete all 3 categories to unlock the "Comeback" badge 🎖️</div>
+                </div>
+
+                <button class="btn btn-primary" style="margin-top: 0;" onclick="window.closeModal('missedTasksModal');">✨ Close</button>
+            </div>
+        </div>
+
+        <!-- Upload Task Modal -->
+        <div class="modal" id="uploadTaskModal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    📤 Upload Tasks
+                    <button class="close-btn" onclick="closeModal('uploadTaskModal')">×</button>
+                </div>
+                <div class="form-group">
+                    <label>Select Goal Category</label>
+                    <select>
+                        <option>Spiritual Goal</option>
+                        <option>Personal Goal</option>
+                        <option>Family Goal</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Upload CSV File</label>
+                    <input type="file" accept=".csv">
+                </div>
+                <button class="btn btn-primary" onclick="closeModal('uploadTaskModal')">📁 Upload</button>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
