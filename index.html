@@ -966,6 +966,30 @@
             }
         ];
 
+        // Quote Slider
+        let currentQuote = 0;
+        window.goToQuote = function(index) {
+            currentQuote = index;
+            const slider = document.getElementById('quotesSlider');
+            if (slider) {
+                slider.style.transform = `translateX(-${index * 100}%)`;
+            }
+            
+            // Update dots
+            for (let i = 0; i < 2; i++) {
+                const dot = document.getElementById(`dot${i}`);
+                if (dot) {
+                    if (i === index) {
+                        dot.style.background = 'var(--accent)';
+                        dot.style.boxShadow = '0 0 12px rgba(233, 166, 33, 0.4)';
+                    } else {
+                        dot.style.background = 'rgba(233, 166, 33, 0.3)';
+                        dot.style.boxShadow = 'none';
+                    }
+                }
+            }
+        }
+
         window.showGoalModal = function(index) {
             const goal = goalDetails[index];
             let modalHTML = `
@@ -1511,7 +1535,37 @@
                 <button class="header-btn" onclick="openModal('settingsModal')">⚙️</button>
             </div>
             <div class="content">
-                <div class="dashboard-header">
+                <!-- Daily Quotes Section - Slider -->
+                <div style="margin-bottom: 20px;">
+                    <div style="position: relative; overflow: hidden; border-radius: 14px;">
+                        <div id="quotesSlider" style="display: flex; transition: transform 0.5s ease; transform: translateX(0);">
+                            <!-- Spiritual Quote -->
+                            <div style="min-width: 100%; background: linear-gradient(135deg, rgba(147, 112, 219, 0.1), rgba(147, 112, 219, 0.05)); border: 2px solid rgba(147, 112, 219, 0.3); border-radius: 14px; padding: 20px; text-align: center;">
+                                <div style="font-size: 24px; margin-bottom: 12px;">🙏</div>
+                                <div style="font-size: 12px; color: var(--primary); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px;">Spiritual Quote</div>
+                                <div style="font-size: 14px; color: #666; font-style: italic; line-height: 1.6; margin-bottom: 12px;">"The mind is everything. What you think, you become."</div>
+                                <div style="font-size: 12px; color: var(--accent); font-weight: 600;">— Buddha</div>
+                            </div>
+
+                            <!-- Personal Quote -->
+                            <div style="min-width: 100%; background: linear-gradient(135deg, rgba(233, 166, 33, 0.1), rgba(233, 166, 33, 0.05)); border: 2px solid rgba(233, 166, 33, 0.3); border-radius: 14px; padding: 20px; text-align: center;">
+                                <div style="font-size: 24px; margin-bottom: 12px;">💡</div>
+                                <div style="font-size: 12px; color: var(--primary); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px;">Personal Growth</div>
+                                <div style="font-size: 14px; color: #666; font-style: italic; line-height: 1.6; margin-bottom: 12px;">"You are capable of amazing things. Believe in yourself."</div>
+                                <div style="font-size: 12px; color: var(--accent); font-weight: 600;">— You</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quote Slider Dots -->
+                    <div style="display: flex; justify-content: center; gap: 6px; margin-top: 12px;">
+                        <div id="dot0" onclick="window.goToQuote(0)" style="width: 8px; height: 8px; border-radius: 50%; background: var(--accent); cursor: pointer; transition: all 0.3s; box-shadow: 0 0 12px rgba(233, 166, 33, 0.4);"></div>
+                        <div id="dot1" onclick="window.goToQuote(1)" style="width: 8px; height: 8px; border-radius: 50%; background: rgba(233, 166, 33, 0.3); cursor: pointer; transition: all 0.3s;"></div>
+                    </div>
+                </div>
+
+                <!-- Rest of Dashboard Content -->
+                <div>
                     <div class="dashboard-date">
                         <div>
                             <div class="date-greeting">Welcome Back! 👋</div>
